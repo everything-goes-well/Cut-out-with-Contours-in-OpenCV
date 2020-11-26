@@ -1,7 +1,5 @@
-data_path = '/home/pepsi/Pictures/'
-
 import cv2 as cv
-img = 255-cv.imread(data_path+'test.jpg')
+img = 255-cv.imread('test.jpg')
 img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
 blur = cv.GaussianBlur(img_gray,(5,5),0)
 ret,th = cv.threshold(blur,20,255,cv.THRESH_BINARY)
