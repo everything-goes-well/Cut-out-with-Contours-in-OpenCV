@@ -4,7 +4,7 @@ import argparse
 # 用于指定参数
 ap = argparse.ArgumentParser()
 ap.add_argument('-i','--image',type=str,help = 'file path',
-                default='test.jpg')
+                default='test2.jpg')
 # 指定轮廓面积占图片比例的阈值，超过阈值的轮廓才能被显示
 ap.add_argument('-th','--threshold',type = float,help = 'contour area proportion of pic',
                 default=0.1)
@@ -26,10 +26,31 @@ pic_area = img.shape[0]*img.shape[1]
 cnt_area_list = [cv.contourArea(cnt)/pic_area for cnt in contours]
 area_th = args['threshold']
 # 根据阈值筛选轮廓
-cnt_idx = np.where([c > area_th for c in cnt_area_list])
+cnt_idx = np.where([c > area_th for c in cnt_area_list])[0]
 
 # 选取轮廓用于抠图，后续应当改为可交互式操作选取
-cnt = contours[cnt_idx[0][-1]]
+# cnt = contours[cnt_idx[-1]]
+
+
+
+
+# 尝试添加鼠标点击获取轮廓序号
+def get_coordinates(event,x,y,flags,param):
+    global pt
+    if event == cv.EVENT_LBUTTONDBLCLK:
+        pt = (x,y)
+        cv.destroyAllWindows()
+
+cv.namedWindow('image')
+cv.setMouseCallback('image',get_coordinates)
+cv.imshow('image',original)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
+idx = np.where([cv.pointPolygonTest(contours[cnt_idx[i]],pt,False) == 1 for i in range(len(cnt_idx))])[0]
+cnt = contours[cnt_idx[idx][0]]
+
+
 # 使用轮廓生成mask
 black_board = np.zeros(original.shape[:2])
 fP = cv.fillPoly(black_board,[cnt],(255,255,255))
@@ -40,3 +61,4 @@ cut_out = cut_out[cnt[:,:,1].min():cnt[:,:,1].max(),
 
 cv.imshow('',cut_out)
 cv.waitKey(0)
+
